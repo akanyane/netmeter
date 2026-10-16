@@ -51,19 +51,13 @@ static int measure_handshake(double *out_ms)
     return 0;
 }
 
-int run_ping(ping_result_t *result)
+void ping_compute_stats(const double *samples, int n, ping_result_t *result)
 {
-    double samples[PING_SAMPLES];
     double sum = 0.0, diff_sum = 0.0;
     int i;
 
-    for (i = 0; i < PING_SAMPLES; i++) {
-        if (measure_handshake(&samples[i]) != 0)
-            return -1;
-    }
-
     result->min_ms = samples[0];
-    for (i = 0; i < PING_SAMPLES; i++) {
+    for (i = 0; i < n; i++) {
         sum += samples[i];
         if (samples[i] < result->min_ms)
             result->min_ms = samples[i];
@@ -71,8 +65,21 @@ int run_ping(ping_result_t *result)
             diff_sum += fabs(samples[i] - samples[i - 1]);
     }
 
-    result->samples = PING_SAMPLES;
-    result->avg_ms = sum / PING_SAMPLES;
-    result->jitter_ms = diff_sum / (PING_SAMPLES - 1);
+    result->samples = n;
+    result->avg_ms = sum / n;
+    result->jitter_ms = n > 1 ? diff_sum / (n - 1) : 0.0;
+}
+
+int run_ping(ping_result_t *result)
+{
+    double samples[PING_SAMPLES];
+    int i;
+
+    for (i = 0; i < PING_SAMPLES; i++) {
+        if (measure_handshake(&samples[i]) != 0)
+            return -1;
+    }
+
+    ping_compute_stats(samples, PING_SAMPLES, result);
     return 0;
 }
