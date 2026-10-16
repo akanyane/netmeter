@@ -1,0 +1,28 @@
+# Objects and build output
+build/
+*.o
+*.obj
+*.d
+*.a
+*.so
+*.dll
+*.dylib
+
+# Binaries
+netmeter
+netmeter.exe
+*.exe
+*.out
+
+# Debug / coverage
+*.dSYM/
+*.gcda
+*.gcno
+core
+vgcore.*
+
+# Editors and OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
