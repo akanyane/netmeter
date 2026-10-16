@@ -98,3 +98,7 @@ netmeter/
 ├── include/   # download.h, ping.h, upload.h, utils.h
 └── src/       # main.c, download.c, ping.c, upload.c, utils.c
 ```
+
+## Licença
+
+Domínio público, sob a [Unlicense](LICENSE).
