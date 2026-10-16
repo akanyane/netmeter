@@ -17,7 +17,10 @@ endif
 CFLAGS += -std=c99 -Wall -Wextra -O2 -Iinclude $(CURL_CFLAGS)
 LDLIBS += $(CURL_LIBS) -lm
 
-.PHONY: all clean run
+PREFIX ?= /usr/local
+BINDIR := $(PREFIX)/bin
+
+.PHONY: all clean run install uninstall
 
 all: $(TARGET)
 
@@ -33,6 +36,13 @@ $(BUILD):
 # Pass options with: make run ARGS="-s 5 -j"
 run: all
 	./$(TARGET) $(ARGS)
+
+install: all
+	mkdir -p $(DESTDIR)$(BINDIR)
+	install -m 755 $(TARGET) $(DESTDIR)$(BINDIR)/$(TARGET)
+
+uninstall:
+	rm -f $(DESTDIR)$(BINDIR)/$(TARGET)
 
 clean:
 	rm -rf $(BUILD) $(TARGET)

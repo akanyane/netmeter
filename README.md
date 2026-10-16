@@ -44,6 +44,14 @@ make clean      # remove build/ e o executável
 
 No MSYS2 UCRT64, use `mingw32-make` se o `make` não estiver no PATH. O projeto compila com `-std=c99 -Wall -Wextra` sem avisos.
 
+### Instalando o binário
+
+```bash
+sudo make install                      # instala em /usr/local/bin
+make install PREFIX=$HOME/.local       # instala só para o seu usuário
+sudo make uninstall                    # remove
+```
+
 ## Usando
 
 ```bash
