@@ -20,7 +20,12 @@ LDLIBS += $(CURL_LIBS) -lm
 PREFIX ?= /usr/local
 BINDIR := $(PREFIX)/bin
 
-.PHONY: all clean run install uninstall
+TEST_TARGET := $(BUILD)/test_netmeter
+ifeq ($(OS),Windows_NT)
+TEST_TARGET := $(BUILD)/test_netmeter.exe
+endif
+
+.PHONY: all clean run install uninstall test
 
 all: $(TARGET)
 
@@ -36,6 +41,13 @@ $(BUILD):
 # Pass options with: make run ARGS="-s 5 -j"
 run: all
 	./$(TARGET) $(ARGS)
+
+# Unit tests do not touch the network
+$(TEST_TARGET): tests/test_netmeter.c $(BUILD)/utils.o $(BUILD)/ping.o | $(BUILD)
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(LDLIBS)
+
+test: $(TEST_TARGET)
+	./$(TEST_TARGET)
 
 install: all
 	mkdir -p $(DESTDIR)$(BINDIR)
