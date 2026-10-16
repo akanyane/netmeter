@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/akanyane/netmeter/compare/v1.0.0...v1.1.0) (2026-10-16)
+
+
+### Features
+
+* adiciona alvos install e uninstall ([bd3ceb5](https://github.com/akanyane/netmeter/commit/bd3ceb586f9e79dd0691c39a14a775d68a7648ec))
+
 ## 1.0.0 (2026-10-16)
 
 
