@@ -13,8 +13,67 @@ permissions:
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
       - uses: googleapis/release-please-action@v4
+        id: release
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+
+  binary-linux:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name }}
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libcurl4-openssl-dev pkg-config
+      - name: Build
+        run: make
+      - name: Package
+        run: tar czf netmeter-linux-x86_64.tar.gz netmeter LICENSE README.md
+      - name: Upload to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ needs.release-please.outputs.tag_name }}" netmeter-linux-x86_64.tar.gz --clobber
+
+  binary-windows:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created }}
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name }}
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            make
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-curl
+            mingw-w64-ucrt-x86_64-pkgconf
+      - name: Build and collect DLLs
+        shell: msys2 {0}
+        run: |
+          make
+          mkdir dist
+          cp netmeter.exe LICENSE README.md dist/
+          # Bundle the UCRT64 DLLs so the .exe runs without an MSYS2 install
+          ldd netmeter.exe | awk '/\/ucrt64\/bin\//{print $3}' | xargs -I{} cp {} dist/
+      - name: Package
+        shell: pwsh
+        run: Compress-Archive -Path dist/* -DestinationPath netmeter-windows-ucrt64-x86_64.zip
+      - name: Upload to release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ needs.release-please.outputs.tag_name }}" netmeter-windows-ucrt64-x86_64.zip --clobber
