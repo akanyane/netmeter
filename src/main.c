@@ -18,15 +18,15 @@
 
 static void print_usage(const char *prog)
 {
-    printf("netmeter - mede a velocidade da sua internet\n\n"
-           "Uso: %s [opções]\n\n"
-           "Opções:\n"
-           "  -d, --download-only   executa somente o teste de download\n"
-           "  -u, --upload-only     executa somente o teste de upload\n"
-           "  -p, --ping-only       executa somente o teste de latência\n"
-           "  -s, --size <MB>       tamanho dos testes em MB (padrão: %d MB download, %d MB upload)\n"
-           "  -j, --json            saída em formato JSON\n"
-           "  -h, --help            mostra esta ajuda\n",
+    printf("netmeter - measures your internet speed\n\n"
+           "Usage: %s [options]\n\n"
+           "Options:\n"
+           "  -d, --download-only   run only the download test\n"
+           "  -u, --upload-only     run only the upload test\n"
+           "  -p, --ping-only       run only the latency (ping) test\n"
+           "  -s, --size <MB>       test size in MB (default: %d MB download, %d MB upload)\n"
+           "  -j, --json            output in JSON format\n"
+           "  -h, --help            show this help\n",
            prog, DEFAULT_DOWNLOAD_MB, DEFAULT_UPLOAD_MB);
 }
 
@@ -73,7 +73,7 @@ int main(int argc, char **argv)
             break;
         case 's':
             if (parse_size(optarg, &size_mb) != 0) {
-                fprintf(stderr, "Erro: tamanho inválido '%s' (use um inteiro entre 1 e %d MB)\n",
+                fprintf(stderr, "Error: invalid size '%s' (use an integer between 1 and %d MB)\n",
                         optarg, MAX_SIZE_MB);
                 return EXIT_FAILURE;
             }
@@ -85,13 +85,13 @@ int main(int argc, char **argv)
             print_usage(argv[0]);
             return EXIT_SUCCESS;
         default:
-            fprintf(stderr, "Use '%s --help' para ver as opções disponíveis.\n", argv[0]);
+            fprintf(stderr, "Use '%s --help' to see the available options.\n", argv[0]);
             return EXIT_FAILURE;
         }
     }
 
     if (only_download + only_upload + only_ping > 1) {
-        fprintf(stderr, "Erro: -d, -u e -p não podem ser usadas juntas.\n");
+        fprintf(stderr, "Error: -d, -u and -p cannot be used together.\n");
         return EXIT_FAILURE;
     }
 
@@ -102,13 +102,13 @@ int main(int argc, char **argv)
 
     rc = curl_global_init(CURL_GLOBAL_DEFAULT);
     if (rc != CURLE_OK) {
-        fprintf(stderr, "Erro: não foi possível inicializar a libcurl: %s\n", curl_easy_strerror(rc));
+        fprintf(stderr, "Error: could not initialize libcurl: %s\n", curl_easy_strerror(rc));
         return EXIT_FAILURE;
     }
 
     if (run_ping_test) {
         if (!json)
-            fprintf(stderr, "Medindo latência...\n");
+            fprintf(stderr, "Measuring latency...\n");
         if (run_ping(&ping) != 0) {
             status = EXIT_FAILURE;
             goto done;
@@ -146,14 +146,14 @@ int main(int argc, char **argv)
     } else {
         printf("=== netmeter ===\n");
         if (run_ping_test)
-            printf("Latência (%d conexões)\n  Mínimo : %8.2f ms\n  Média  : %8.2f ms\n"
-                   "  Jitter : %8.2f ms\n",
+            printf("Latency (%d connections)\n  Minimum : %8.2f ms\n  Average : %8.2f ms\n"
+                   "  Jitter  : %8.2f ms\n",
                    ping.samples, ping.min_ms, ping.avg_ms, ping.jitter_ms);
         if (run_download_test)
-            printf("Download : %8.2f Mbps  (%.1f MB em %.2f s)\n", download.mbps,
+            printf("Download : %8.2f Mbps  (%.1f MB in %.2f s)\n", download.mbps,
                    (double)download.bytes / (1024.0 * 1024.0), download.seconds);
         if (run_upload_test)
-            printf("Upload   : %8.2f Mbps  (%.1f MB em %.2f s)\n", upload.mbps,
+            printf("Upload   : %8.2f Mbps  (%.1f MB in %.2f s)\n", upload.mbps,
                    (double)upload.bytes / (1024.0 * 1024.0), upload.seconds);
     }
 

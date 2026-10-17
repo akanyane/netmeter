@@ -58,9 +58,9 @@ int main(void)
     test_ping_stats();
 
     if (failures) {
-        fprintf(stderr, "%d teste(s) falharam\n", failures);
+        fprintf(stderr, "%d test(s) failed\n", failures);
         return EXIT_FAILURE;
     }
-    printf("Todos os testes passaram\n");
+    printf("All tests passed\n");
     return EXIT_SUCCESS;
 }

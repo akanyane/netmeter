@@ -16,7 +16,7 @@ static int measure_handshake(double *out_ms)
     CURL *curl = create_handle(errbuf);
 
     if (!curl) {
-        fprintf(stderr, "Erro no teste de latência: não foi possível inicializar a libcurl\n");
+        fprintf(stderr, "Error in latency test: could not initialize libcurl\n");
         return -1;
     }
 
@@ -27,7 +27,7 @@ static int measure_handshake(double *out_ms)
 
     rc = curl_easy_perform(curl);
     if (rc != CURLE_OK) {
-        print_curl_error("latência", rc, errbuf);
+        print_curl_error("latency", rc, errbuf);
         curl_easy_cleanup(curl);
         return -1;
     }
@@ -39,11 +39,11 @@ static int measure_handshake(double *out_ms)
     curl_easy_cleanup(curl);
 
     if (rc != CURLE_OK) {
-        print_curl_error("latência", rc, NULL);
+        print_curl_error("latency", rc, NULL);
         return -1;
     }
     if (status != 200) {
-        print_http_error("latência", status);
+        print_http_error("latency", status);
         return -1;
     }
 

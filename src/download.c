@@ -17,7 +17,7 @@ int run_download(int size_mb, int show_progress, transfer_result_t *result)
     CURL *curl = create_handle(errbuf);
 
     if (!curl) {
-        fprintf(stderr, "Erro no teste de download: não foi possível inicializar a libcurl\n");
+        fprintf(stderr, "Error in download test: could not initialize libcurl\n");
         return -1;
     }
 

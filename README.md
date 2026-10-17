@@ -1,21 +1,21 @@
 # netmeter
 
-Ferramenta de linha de comando, escrita em C99 com libcurl, que mede a velocidade da sua internet usando os endpoints públicos de teste da Cloudflare (`speed.cloudflare.com`).
+A command-line tool written in C99 with libcurl that measures your internet speed using Cloudflare's public test endpoints (`speed.cloudflare.com`).
 
-## O que ele mede
+## What it measures
 
-| Teste | Como funciona | Resultado |
-|-------|---------------|-----------|
-| **Latência (ping)** | Abre 5 conexões novas e mede o handshake TCP (`CURLINFO_CONNECT_TIME_T` menos `CURLINFO_NAMELOOKUP_TIME_T`) | Mínimo, média e jitter em ms |
-| **Download** | Baixa `https://speed.cloudflare.com/__down?bytes=N` descartando o conteúdo | Velocidade em Mbps |
-| **Upload** | Envia um buffer via POST para `https://speed.cloudflare.com/__up` | Velocidade em Mbps |
+| Test | How it works | Result |
+|------|--------------|--------|
+| **Latency (ping)** | Opens 5 fresh connections and measures the TCP handshake (`CURLINFO_CONNECT_TIME_T` minus `CURLINFO_NAMELOOKUP_TIME_T`) | Minimum, average and jitter in ms |
+| **Download** | Downloads `https://speed.cloudflare.com/__down?bytes=N`, discarding the content | Speed in Mbps |
+| **Upload** | Sends a buffer via POST to `https://speed.cloudflare.com/__up` | Speed in Mbps |
 
-- O **jitter** é a média da diferença absoluta entre amostras consecutivas de latência.
-- Em download e upload, o tempo de DNS, TCP e TLS é descontado (`CURLINFO_PRETRANSFER_TIME_T`), então a velocidade reflete apenas a transferência dos dados.
-- Durante os testes, uma barra de progresso é exibida no `stderr` (via `CURLOPT_XFERINFOFUNCTION`). Ela só aparece em terminal interativo e é desligada com `--json`.
-- Os tamanhos usam MB = 1024 × 1024 bytes; o resultado em Mbps usa megabits decimais (10⁶ bits/s).
+- **Jitter** is the mean absolute difference between consecutive latency samples.
+- For download and upload, DNS, TCP and TLS setup time is excluded (`CURLINFO_PRETRANSFER_TIME_T`), so the speed reflects only the data transfer.
+- A progress bar is drawn on `stderr` during the tests (via `CURLOPT_XFERINFOFUNCTION`). It only appears in an interactive terminal and is disabled with `--json`.
+- Sizes use MB = 1024 × 1024 bytes; the Mbps result uses decimal megabits (10⁶ bits/s).
 
-## Instalando a libcurl
+## Installing libcurl
 
 ### Ubuntu / Debian
 
@@ -24,89 +24,93 @@ sudo apt update
 sudo apt install -y build-essential libcurl4-openssl-dev pkg-config
 ```
 
-### Windows (MSYS2, ambiente UCRT64)
+### Windows (MSYS2, UCRT64 environment)
 
-Abra o terminal **MSYS2 UCRT64** e execute:
+Open the **MSYS2 UCRT64** terminal and run:
 
 ```bash
-pacman -S --needed mingw-w64-ucrt-x86_64-gcc \
-                   mingw-w64-ucrt-x86_64-make \
+pacman -S --needed make \
+                   mingw-w64-ucrt-x86_64-gcc \
                    mingw-w64-ucrt-x86_64-curl \
                    mingw-w64-ucrt-x86_64-pkgconf
 ```
 
-## Compilando
+## Building
 
 ```bash
-make            # gera o executável (netmeter, ou netmeter.exe no Windows)
-make clean      # remove build/ e o executável
+make            # builds the executable (netmeter, or netmeter.exe on Windows)
+make test       # builds and runs the unit tests (no network needed)
+make clean      # removes build/ and the executable
 ```
 
-No MSYS2 UCRT64, use `mingw32-make` se o `make` não estiver no PATH. O projeto compila com `-std=c99 -Wall -Wextra` sem avisos.
+The project builds with `-std=c99 -Wall -Wextra` without warnings. On Linux and in MSYS2 UCRT64 `make` is enough.
 
-### Instalando o binário
+### Installing the binary
 
 ```bash
-sudo make install                      # instala em /usr/local/bin
-make install PREFIX=$HOME/.local       # instala só para o seu usuário
-sudo make uninstall                    # remove
+sudo make install                      # installs to /usr/local/bin
+make install PREFIX=$HOME/.local       # installs for your user only
+sudo make uninstall                    # removes it
 ```
 
-## Usando
+Prebuilt binaries for Linux (`.tar.gz`, needs `libcurl4`) and Windows (`.zip`, DLLs included) are attached to each [release](../../releases).
+
+## Usage
 
 ```bash
 ./netmeter                # ping + download (25 MB) + upload (10 MB)
-./netmeter -p             # somente latência
-./netmeter -d -s 100      # somente download com 100 MB
-./netmeter -u             # somente upload
-./netmeter -j             # saída em JSON
-make run ARGS="-s 5"      # compila (se preciso) e executa com argumentos
+./netmeter -p             # latency only
+./netmeter -d -s 100      # download only, 100 MB
+./netmeter -u             # upload only
+./netmeter -j             # JSON output
+make run ARGS="-s 5"      # builds (if needed) and runs with arguments
 ```
 
-### Opções
+### Options
 
-| Opção | Descrição |
-|-------|-----------|
-| `-d`, `--download-only` | Executa somente o teste de download |
-| `-u`, `--upload-only` | Executa somente o teste de upload |
-| `-p`, `--ping-only` | Executa somente o teste de latência |
-| `-s`, `--size <MB>` | Tamanho dos testes em MB, de 1 a 1024 (padrão: 25 MB download, 10 MB upload) |
-| `-j`, `--json` | Saída em formato JSON |
-| `-h`, `--help` | Mostra a ajuda |
+| Option | Description |
+|--------|-------------|
+| `-d`, `--download-only` | Run only the download test |
+| `-u`, `--upload-only` | Run only the upload test |
+| `-p`, `--ping-only` | Run only the latency test |
+| `-s`, `--size <MB>` | Test size in MB, from 1 to 1024 (default: 25 MB download, 10 MB upload) |
+| `-j`, `--json` | Output in JSON format |
+| `-h`, `--help` | Show the help |
 
-`-d`, `-u` e `-p` são mutuamente exclusivas. Em caso de erro (sem rede, timeout, falha de TLS etc.), o programa imprime uma mensagem em português no `stderr` e termina com código de saída 1.
+`-d`, `-u` and `-p` are mutually exclusive. On failure (no network, timeout, TLS error, etc.) the program prints a clear message to `stderr` and exits with status 1.
 
-## Exemplo de saída
+## Example output
 
 ```text
 $ ./netmeter
-Medindo latência...
+Measuring latency...
 === netmeter ===
-Latência (5 conexões)
-  Mínimo :    12.82 ms
-  Média  :    14.21 ms
-  Jitter :     2.44 ms
-Download :   507.97 Mbps  (25.0 MB em 0.41 s)
-Upload   :    32.50 Mbps  (10.0 MB em 2.58 s)
+Latency (5 connections)
+  Minimum :     8.05 ms
+  Average :    10.95 ms
+  Jitter  :     3.30 ms
+Download :   132.10 Mbps  (25.0 MB in 1.59 s)
+Upload   :   235.38 Mbps  (10.0 MB in 0.36 s)
 ```
 
-Com `--json`:
+With `--json`:
 
 ```json
 {"ping":{"min_ms":6.65,"avg_ms":10.25,"jitter_ms":3.91,"samples":5},"download":{"mbps":92.16,"bytes":5242880,"seconds":0.455},"upload":{"mbps":97.83,"bytes":5242880,"seconds":0.429}}
 ```
 
-> Os valores variam a cada execução, conforme a rede e a distância até o servidor da Cloudflare.
+> Values vary on every run, depending on your network and the distance to the Cloudflare server.
 
-## Estrutura
+## Project layout
 
 ```text
 netmeter/
 ├── Makefile
 ├── include/   # download.h, ping.h, upload.h, utils.h
-└── src/       # main.c, download.c, ping.c, upload.c, utils.c
+├── src/       # main.c, download.c, ping.c, upload.c, utils.c
+└── tests/     # test_netmeter.c
 ```
 
-## Licença
+## License
 
-Domínio público, sob a [Unlicense](LICENSE).
+Public domain, under the [Unlicense](LICENSE).

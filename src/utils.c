@@ -86,55 +86,55 @@ void print_curl_error(const char *context, CURLcode code, const char *errbuf)
 
     switch (code) {
     case CURLE_COULDNT_RESOLVE_HOST:
-        reason = "não foi possível resolver o endereço do servidor (verifique sua conexão e o DNS)";
+        reason = "could not resolve the server address (check your connection and DNS)";
         break;
     case CURLE_COULDNT_RESOLVE_PROXY:
-        reason = "não foi possível resolver o endereço do proxy";
+        reason = "could not resolve the proxy address";
         break;
     case CURLE_COULDNT_CONNECT:
-        reason = "não foi possível conectar ao servidor";
+        reason = "could not connect to the server";
         break;
     case CURLE_OPERATION_TIMEDOUT:
-        reason = "tempo limite excedido (a conexão está muito lenta ou instável)";
+        reason = "timed out (the connection is too slow or unstable)";
         break;
     case CURLE_SSL_CONNECT_ERROR:
-        reason = "falha no handshake TLS/SSL";
+        reason = "TLS/SSL handshake failed";
         break;
     case CURLE_PEER_FAILED_VERIFICATION:
-        reason = "falha ao verificar o certificado do servidor";
+        reason = "failed to verify the server certificate";
         break;
     case CURLE_SEND_ERROR:
-        reason = "falha ao enviar dados ao servidor";
+        reason = "failed to send data to the server";
         break;
     case CURLE_RECV_ERROR:
-        reason = "falha ao receber dados do servidor";
+        reason = "failed to receive data from the server";
         break;
     case CURLE_GOT_NOTHING:
-        reason = "o servidor fechou a conexão sem enviar resposta";
+        reason = "the server closed the connection without sending a response";
         break;
     case CURLE_ABORTED_BY_CALLBACK:
-        reason = "transferência interrompida";
+        reason = "transfer aborted";
         break;
     case CURLE_OUT_OF_MEMORY:
-        reason = "memória insuficiente";
+        reason = "not enough memory";
         break;
     case CURLE_UNSUPPORTED_PROTOCOL:
-        reason = "protocolo não suportado por esta build da libcurl";
+        reason = "protocol not supported by this libcurl build";
         break;
     default:
         reason = curl_easy_strerror(code);
         break;
     }
 
-    fprintf(stderr, "Erro no teste de %s: %s (código libcurl %d)", context, reason, (int)code);
+    fprintf(stderr, "Error in %s test: %s (libcurl code %d)", context, reason, (int)code);
     if (errbuf && errbuf[0] != '\0' && code != CURLE_ABORTED_BY_CALLBACK)
-        fprintf(stderr, " - detalhe: %s", errbuf);
+        fprintf(stderr, " - detail: %s", errbuf);
     fputc('\n', stderr);
 }
 
 void print_http_error(const char *context, long status)
 {
-    fprintf(stderr, "Erro no teste de %s: o servidor respondeu com HTTP %ld (esperado 200)\n",
+    fprintf(stderr, "Error in %s test: server responded with HTTP %ld (expected 200)\n",
             context, status);
 }
 

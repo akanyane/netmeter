@@ -21,14 +21,14 @@ int run_upload(int size_mb, int show_progress, transfer_result_t *result)
 
     buffer = malloc((size_t)size);
     if (!buffer) {
-        fprintf(stderr, "Erro no teste de upload: memória insuficiente para alocar %d MB\n", size_mb);
+        fprintf(stderr, "Error in upload test: not enough memory to allocate %d MB\n", size_mb);
         return -1;
     }
     memset(buffer, 'x', (size_t)size);
 
     curl = create_handle(errbuf);
     if (!curl) {
-        fprintf(stderr, "Erro no teste de upload: não foi possível inicializar a libcurl\n");
+        fprintf(stderr, "Error in upload test: could not initialize libcurl\n");
         free(buffer);
         return -1;
     }
